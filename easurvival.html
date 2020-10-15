@@ -1,0 +1,187 @@
+ <html>
+<head>
+<title>EA Survival</title>
+</head>
+<body>
+
+<div id='display_stats'></div>
+<div id='display_items'></div>
+<div id='display_options'></div>
+
+
+<script>
+var stats = {
+  hunger:80,
+  thirst:80,
+  motivation:11
+}
+
+var items = {
+  food: 5,
+  water: 5,
+  points: 0
+  
+}
+var checked_option = 'idle'
+var my_options = {}
+my_options.idle = {}
+my_options.idle.shouldIShowThis = function(){return true}
+my_options.idle.func = function(){}
+my_options.idle.description = 'Chill'
+my_options.eat = {}
+my_options.eat.description = 'Eat one food'
+my_options.eat.shouldIShowThis = function(){
+  if (items.food > 0){return true}
+  return false
+}
+my_options.eat.func = function(){
+  if (items.food < 1) {return} 
+  stats.hunger = stats.hunger - 10
+  if (stats.hunger < 0) {stats.hunger = 0}
+  items.food = items.food - 1
+} 
+my_options.drink = {}
+my_options.drink.description = 'Drink a waterbottle'
+my_options.drink.shouldIShowThis = function(){
+  if (items.water > 0){return true}
+  return false
+}
+my_options.drink.func = function(){
+  if (items.water < 1) {return} 
+  stats.thirst = stats.thirst - 10
+   if (stats.thirst < 0) {stats.thirst = 0}
+  items.water = items.water - 1
+}
+
+
+my_options.motivate = {}
+my_options.motivate.description = 'Motivate yoself foo'
+my_options.motivate.shouldIShowThis = function(){return true}
+
+my_options.motivate.func = function(){
+  stats.motivation = stats.motivation + 1
+}
+my_options.makemoney = {}
+my_options.makemoney.description = 'Make some dolla dolla bill ya'
+my_options.makemoney.shouldIShowThis = function(){
+  if (stats.motivation > 0) {return true}
+  return false
+}
+my_options.makemoney.func = function(){
+  if (items.money === undefined) {items.money = 0}
+  stats.motivation = stats.motivation - 1
+  items.money = items.money + 1
+}
+
+my_options.buyfood = {}
+my_options.buyfood.description = 'Buy roadkill'
+my_options.buyfood.shouldIShowThis = function(){
+  if (items.money > 0) {return true}
+  return false
+}
+my_options.buyfood.func = function(){
+  if (items.money < 1 || items.money === undefined) {return}
+  items.money = items.money - 1
+  items.food = items.food + 1
+}
+my_options.buywater = {}
+my_options.buywater.description = 'Buy a water bottle'
+my_options.buywater.shouldIShowThis = function(){
+  if (items.money > 0) {return true}
+  return false
+}
+my_options.buywater.func = function(){
+  if (items.money < 1 || items.money === undefined) {return}
+  items.money = items.money - 1
+  items.water = items.water + 1
+}
+
+function showOptions(){
+  
+  var targetdiv = document.getElementById('display_options')
+  var result_text = ''
+  for (var option of Object.keys(my_options)){
+    console.log(my_options[option].shouldIShowThis())
+    if (my_options[option].shouldIShowThis() === false){
+      if (checked_option === option){
+        checked_option = 'idle'
+      }
+      continue
+    }
+    var checked = ''
+    if (checked_option === option){checked = 'checked'}
+    result_text = result_text  + '<input type="radio" name="selected_option" value="' 
+                  + option + '"' + checked + '>' + my_options[option].description + '<br>'
+  
+  }
+  targetdiv.innerHTML = result_text
+}
+
+function showStats(){
+  var targetdiv = document.getElementById('display_stats')
+  var result_text = ''
+  for (var stat of Object.keys(stats)){
+    result_text = result_text + stat + ': ' + stats[stat] + '<br>'
+  
+  }
+  targetdiv.innerHTML = result_text
+}
+
+function showItems(){
+  var targetdiv = document.getElementById('display_items')
+  var result_text = ''
+  for (var item of Object.keys(items)){
+    
+    result_text = result_text + item + ': ' + items[item] + '<br>'
+  
+  
+  }
+  targetdiv.innerHTML = result_text
+}
+
+function doSelectedOption(){
+  var choice_element = document.querySelector('input[name="selected_option"]:checked');
+  if (choice_element === null) return
+  choice = choice_element.value;
+  console.log (choice)
+  checked_option = choice
+  my_options[choice].func()
+}
+
+function areYouDeadYet() {
+  if (stats.hunger > 99) {return true}
+  if (stats.thirst > 99) {return true}
+  if (stats.motivation < 1) {return true}
+  return false
+}
+
+function main() {
+  showStats()
+  showItems()
+  showOptions()
+  var mytimer 
+  mytimer = setInterval( function (){
+    console.log('mytimer')
+    stats.hunger = stats.hunger + 1
+    stats.thirst = stats.thirst + 1
+    items.points = items.points + 1
+    doSelectedOption()
+    showStats()
+    showItems()
+    showOptions()
+    if (areYouDeadYet() === true){
+      alert('rip - you survived for '+ items.points + ' hours')
+      items.points = 0
+      clearInterval(mytimer)
+    }
+  }, 1000)
+  
+  
+  
+}
+
+main()
+
+</script>
+</body>
+</html>
